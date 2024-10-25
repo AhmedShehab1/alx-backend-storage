@@ -10,12 +10,15 @@ from functools import wraps
 
 def count_calls(method: typing.Callable) -> typing.Callable:
     """
-
+    Decorator That counts how many times the decorated method
+    is called.
+    It increments a counter stored in redis, using the method's
+    qualified name as the key.
     Args:
-        method (typing.Callable): called method
+        method (typing.Callable): The method to be wrapped
 
     Returns:
-        typing.Callable: return of the called method
+        typing.Callable: The wrapped method with call-counting functionality
     """
 
     @wraps(method)
@@ -48,7 +51,7 @@ def call_history(method: typing.Callable) -> typing.Callable:
 
 class Cache:
     """
-    Cache Class
+    Cache Class for interacting with Redis
     """
 
     def __init__(self) -> None:
@@ -57,18 +60,21 @@ class Cache:
         """
         self._redis = redis.Redis()
         self._redis.flushdb()
-        self.keys = self._redis.keys()
 
     @count_calls
     @call_history
     def store(self, data: typing.Union[str, bytes, int, float]) -> str:
         """
-        store a given data indentified by a random generated key
+        Stores the given data identified by a randomly generated key
+        in Redis.
+        The method is decorated to store record call count and input/
+        output history
         Args:
             data (typing.Union[str, bytes, int, float]): data to be stored
 
         Returns:
-            str: random key generated
+            str: The randomly generated key that
+                 references the stored data
         """
         random_key = str(uuid.uuid4())
         self._redis.set(random_key, data)
